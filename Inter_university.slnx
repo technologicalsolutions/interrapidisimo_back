@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Inter.DAL/Inter.DAL.csproj" Id="6f9ff838-67d2-410f-a9e9-37b9a79d4a75" />
   <Project Path="Inter_university/Inter_university.csproj" />
 </Solution>

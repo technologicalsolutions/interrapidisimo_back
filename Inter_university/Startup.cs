@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Inter.DAL.Context;
+using Inter.DAL.Models;
+using Inter_university.Init;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -23,18 +28,34 @@ namespace Inter_university
                 j.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
 
+            services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("interDb"));
+            });
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(opciones => opciones.TokenValidationParameters = new TokenValidationParameters
+            .AddJwtBearer(opciones => {
+                string jwtKey = Configuration["llavejwt"] ?? "";
+                opciones.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                      Encoding.UTF8.GetBytes(Configuration["llavejwt"])
+                        Encoding.UTF8.GetBytes(jwtKey)
                     ),
                     ClockSkew = TimeSpan.Zero
-                });
+                };
+            });
+
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
 
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
@@ -102,6 +123,23 @@ namespace Inter_university
             {
                 endpoinds.MapControllers();
             });
+        }
+
+        public async Task InitializeDatabase(WebApplication app)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    await DbInitializer.InitializeAsync(services);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Error al inicializar la base de datos");
+                }
+            }
         }
     }
 }

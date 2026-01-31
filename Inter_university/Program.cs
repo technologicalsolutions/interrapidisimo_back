@@ -8,8 +8,11 @@ var startup = new Startup(builder.Configuration);
 
 startup.ConfigureServices(builder.Services);
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 startup.Configure(app, app.Environment);
+
+/// Inicializar la base de datos al iniciar la aplicación
+await startup.InitializeDatabase(app);
 
 app.Run();
