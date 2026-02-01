@@ -17,6 +17,7 @@ namespace Inter_university.Init
 
             try
             {
+                bool CreateObjects = false;  
                 logger.LogInformation("Verificando base de datos...");
 
                 var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
@@ -25,6 +26,7 @@ namespace Inter_university.Init
                     logger.LogInformation("Aplicando migraciones pendientes...");
                     await context.Database.MigrateAsync();
                     logger.LogInformation("Migraciones aplicadas exitosamente.");
+                    CreateObjects = true;
                 }
                 else
                 {
@@ -34,6 +36,7 @@ namespace Inter_university.Init
                         logger.LogInformation("Creando base de datos...");
                         await context.Database.MigrateAsync();
                         logger.LogInformation("Base de datos creada exitosamente.");
+                        CreateObjects = true;
                     }
                     else
                     {
@@ -41,10 +44,19 @@ namespace Inter_university.Init
                     }
                 }
 
-                await CreateRolesAsync(roleManager, logger);
-                await CreateSuperAdminAsync(userManager, logger);
-                await CreateTeachersAsync(userManager, logger);
-                await CreateCoursesAsync(context, userManager, logger);
+                if (CreateObjects)
+                {
+                    logger.LogInformation("Iniciando creación de datos iniciales...");
+                    await CreateRolesAsync(roleManager, logger);
+                    await CreateSuperAdminAsync(userManager, logger);
+                    await CreateTeachersAsync(userManager, logger);
+                    await CreateCoursesAsync(context, userManager, logger);
+                }
+                else
+                {
+                    logger.LogInformation("Omisión de creación de datos iniciales.");                 
+                }
+                
             }
             catch (Exception ex)
             {

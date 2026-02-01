@@ -10,5 +10,7 @@ namespace Inter.DAL.Dto.User
 
         [Required]
         public string Password { get; set; } = string.Empty;
+
+        public DateTime AuthDate { get; set; } = DateTime.Now;
     }
 }

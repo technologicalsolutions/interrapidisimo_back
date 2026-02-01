@@ -4,18 +4,21 @@ namespace Inter.DAL.Dto.User
 {
     public class RegisterDto
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El campo Nombres es obligatorio.")]
+        public string Nombres { get; set; }
 
-        [Required]
-        [MinLength(6)]
-        public string Password { get; set; } = string.Empty;
+        public string Apellidos { get; set; }
 
-        [Required]
-        public string FullName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El campo Correo es obligatorio.")]
+        public string Correo { get; set; }
 
-        [Required]
-        public string Role { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El campo Clave es obligatorio.")]
+        public string Clave { get; set; }
+
+        [Required(ErrorMessage = "La confirmación de clave es obligatoria.")]
+        [Compare("Clave", ErrorMessage = "La confirmación de clave no coincide con la clave.")]
+        public string Confirmacion { get; set; }
+
+        public string Telefono { get; set; }
     }
 }
